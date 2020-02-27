@@ -1,0 +1,25 @@
+# the python version of seg2bdry
+def  seg2bdry(seg):
+    h, w= seg.shape
+    bdry = np.zeros((h*2+1, w*2+1))
+    edges_v = np.zeros_like(seg)
+    edges_v[:-1, :] = seg[0:-1, :] != seg[1:, :]
+    edges_v[-1, :] = 0
+    edges_h = np.zeros_like(seg)
+    edges_h[:, :-1] = seg[:, 0:-1] != seg[:, 1:]
+    edges_h[:, -1] = 0
+    
+    bdry[2::2, 1::2] = edges_v
+    bdry[1::2, 2::2] = edges_h
+    t_h = np.where(edges_h[0:-1, 0:-1]>edges_h[1:, 0:-1], edges_h[0:-1, 0:-1], edges_h[1:, 0:-1])
+    t_v = np.where(edges_v[0:-1, 0:-1]>edges_v[0:-1, 1:], edges_v[0:-1, 0:-1], edges_v[0:-1, 1:])
+    bdry[2:-1:2, 2:-1:2] = np.where(t_h>t_v, t_h, t_v)
+    # bdry[2:-1:2, 2:-1:2] = max( max(edges_h[0:-1, 0:-1], edges_h[1:, 0:-1]), max(edges_v[0:-1, 0:-1], edges_v[0:-1, 1:]))
+    
+    bdry[0, :] = bdry[1, :]
+    bdry[:, 0] = bdry[:, 1]
+    bdry[-1, :] = bdry[-2, :]
+    bdry[:, -1] = bdry[:, -2]
+    
+    bdry = bdry[2::2, 2::2]
+    return bdry
